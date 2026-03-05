@@ -21,7 +21,7 @@ export const fetchDashboardData = async (): Promise<DashboardData> => {
     throw new Error('User not logged in');
   }
 
-  const response = await fetch(`api/user/dashboard/${userId}`);
+  const response = await fetch(`/api/user/dashboard/${userId}`);
   if (!response.ok) {
     throw new Error('Failed to fetch dashboard data');
   }
