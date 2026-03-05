@@ -42,7 +42,7 @@ export const Dashboard = () => {
   const updateUserMutation = useMutation({
     mutationFn: async (updatedData: Partial<UserStats>) => {
       const userId = localStorage.getItem('userId');
-      const response = await fetch(`api/user/${userId}`, {
+      const response = await fetch(`/api/user/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
