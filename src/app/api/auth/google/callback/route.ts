@@ -33,8 +33,9 @@ export async function GET(req: NextRequest) {
     }
 
     const safeUserId = encodeURIComponent(user.id);
+    const safeRole = encodeURIComponent(user.role);
     return new NextResponse(
-      `<html><body><script>if(window.opener){window.opener.postMessage({type:'OAUTH_AUTH_SUCCESS',userId:'${safeUserId}'},'${process.env.APP_URL || ''}');window.close();}else{window.location.href='/'}</script><p>Authentication successful.</p></body></html>`,
+      `<html><body><script>if(window.opener){window.opener.postMessage({type:'OAUTH_AUTH_SUCCESS',userId:'${safeUserId}',role:'${safeRole}'},'${process.env.APP_URL || ''}');window.close();}else{window.location.href='/'}</script><p>Authentication successful.</p></body></html>`,
       { headers: { 'Content-Type': 'text/html' } }
     );
   } catch (error) {
