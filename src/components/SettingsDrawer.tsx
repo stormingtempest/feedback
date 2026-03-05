@@ -197,7 +197,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose,
                     </div>
                     <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
                       <AlertCircle size={12} />
-                      Can be changed every 7 days
+                      Can be changed every 30 days
                     </p>
                   </div>
 
