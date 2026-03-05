@@ -1,0 +1,7 @@
+{
+  "name": "Feedback Hub",
+  "description": "A premium feedback management dashboard with glassmorphism and gamification elements.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,32 @@
+Options -Indexes -MultiViews
+AddDefaultCharset UTF-8
+
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "no-referrer-when-downgrade"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Se o seu projeto estiver em uma subpasta, altere para /nome-da-pasta/
+  # Se estiver na raiz, use /
+  RewriteBase /feedback/
+
+  # API (não reescrever caminhos reais da API)
+  RewriteRule ^api/api\.php$ - [L]
+
+  # NÃO reescrever assets e arquivos reais
+  RewriteRule ^assets/ - [L]
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # SPA fallback (tudo o que não existir vira index.html)
+  RewriteRule ^ index.html [L]
+</IfModule>
