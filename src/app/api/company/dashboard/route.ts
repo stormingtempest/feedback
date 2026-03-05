@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, notFound, handle, requireRole } from '@/lib/api';
 
 const companyInclude = {
   projects: {
@@ -19,35 +20,29 @@ const companyInclude = {
   },
 };
 
-export async function GET(req: NextRequest) {
-  try {
-    const userId = req.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user || user.role !== 'COMPANY') return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+export const GET = (req: NextRequest) =>
+  handle(async () => {
+    const user = await requireRole(req, 'COMPANY');
 
     let company = user.companyTag
       ? await prisma.company.findUnique({ where: { tag: user.companyTag }, include: companyInclude })
-      : await prisma.company.findFirst({ where: { managerId: userId }, include: companyInclude });
+      : await prisma.company.findFirst({ where: { managerId: user.id }, include: companyInclude });
 
     if (!company) {
       const first = await prisma.company.findFirst();
-      if (first) {
-        company = await prisma.company.findUnique({ where: { id: first.id }, include: companyInclude });
-      }
+      if (first) company = await prisma.company.findUnique({ where: { id: first.id }, include: companyInclude });
     }
-    if (!company) return NextResponse.json({ message: 'Company not found' }, { status: 404 });
+    if (!company) notFound('Company not found');
 
-    const projectIds = company.projects?.map((p) => p.id) ?? [];
+    const projectIds = company!.projects?.map((p) => p.id) ?? [];
     const allFeedbacks = await prisma.feedback.findMany({
-      where: { OR: [{ campaign: { projectId: { in: projectIds } } }, { campaign: { companyId: company.id } }] },
+      where: { OR: [{ campaign: { projectId: { in: projectIds } } }, { campaign: { companyId: company!.id } }] },
       orderBy: { createdAt: 'desc' },
     });
 
     const totalFeedbacks = allFeedbacks.length;
-    let totalCampaigns = company.campaigns?.length ?? 0;
-    company.projects?.forEach((p) => { totalCampaigns += p.campaigns?.length ?? 0; });
+    let totalCampaigns = company!.campaigns?.length ?? 0;
+    company!.projects?.forEach((p) => { totalCampaigns += p.campaigns?.length ?? 0; });
 
     const typeDistribution = allFeedbacks.reduce((acc, f) => { acc[f.category] = (acc[f.category] || 0) + 1; return acc; }, {} as Record<string, number>);
     const categoryMeasures = allFeedbacks.reduce((acc, f) => {
@@ -77,9 +72,8 @@ export async function GET(req: NextRequest) {
       directives: allFeedbacks.reduce((acc, f) => { acc[f.status] = (acc[f.status] || 0) + 1; return acc; }, {} as Record<string, number>),
     };
 
-    return NextResponse.json({ company, stats: { totalProjects: company.projects?.length ?? 0, totalCampaigns, totalFeedbacks, typeDistribution, categoryMeasures, evolution, topUsers, statusMetrics } });
-  } catch (error) {
-    console.error('Error fetching company dashboard:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  }
-}
+    return ok({
+      company: company!,
+      stats: { totalProjects: company!.projects?.length ?? 0, totalCampaigns, totalFeedbacks, typeDistribution, categoryMeasures, evolution, topUsers, statusMetrics },
+    });
+  });

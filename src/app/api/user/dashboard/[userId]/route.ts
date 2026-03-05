@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, notFound, handle, getAuthUser } from '@/lib/api';
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
-  const { userId } = await params;
-  try {
+export const GET = (req: NextRequest, { params }: { params: Promise<{ userId: string }> }) =>
+  handle(async () => {
+    await getAuthUser(req);
+    const { userId } = await params;
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -12,25 +15,25 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
         feedbacks: { include: { campaign: true } },
       },
     });
-    if (!user) return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    if (!user) notFound('User not found');
 
     const campaigns = await prisma.campaign.findMany({ take: 4, orderBy: { createdAt: 'desc' } });
 
-    return NextResponse.json({
+    return ok({
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        level: user.level,
-        levelTitle: user.levelTitle,
-        points: user.points,
-        nextLevelPoints: user.nextLevelPoints,
-        description: user.description || '',
-        avatarSeed: user.avatarSeed || user.name,
-        lastNameChange: user.lastNameChange,
-        googleId: user.googleId,
-        discordId: user.discordId,
-        achievements: user.achievements.map((ua) => ({
+        id: user!.id,
+        name: user!.name,
+        email: user!.email,
+        level: user!.level,
+        levelTitle: user!.levelTitle,
+        points: user!.points,
+        nextLevelPoints: user!.nextLevelPoints,
+        description: user!.description || '',
+        avatarSeed: user!.avatarSeed || user!.name,
+        lastNameChange: user!.lastNameChange,
+        googleId: user!.googleId,
+        discordId: user!.discordId,
+        achievements: user!.achievements.map((ua) => ({
           id: ua.achievement.id,
           icon: ua.achievement.icon,
           label: ua.achievement.label,
@@ -38,7 +41,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
           description: ua.achievement.description,
           unlocked: true,
         })),
-        missions: user.missions.map((um) => ({
+        missions: user!.missions.map((um) => ({
           id: um.mission.id,
           title: um.mission.title,
           description: um.mission.description,
@@ -52,7 +55,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
         description: c.description || '',
         progress: c.progress,
       })),
-      history: user.feedbacks.map((f) => ({
+      history: user!.feedbacks.map((f) => ({
         id: f.id,
         projectName: f.campaign.name,
         date: f.createdAt.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
@@ -62,8 +65,4 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ use
         points: 150,
       })),
     });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  }
-}
+  });

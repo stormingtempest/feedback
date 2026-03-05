@@ -1,18 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, badRequest, handle, requireRole } from '@/lib/api';
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  try {
+export const PUT = (req: NextRequest, { params }: { params: Promise<{ id: string }> }) =>
+  handle(async () => {
+    await requireRole(req, 'ADMIN', 'MODERATOR');
+    const { id } = await params;
     const { status, internalRating, internalTags, internalComment, internalOtherJustification } = await req.json();
+    if (!status) badRequest('Status is required');
+
     const data: Record<string, unknown> = { moderationStatus: status };
     if (internalRating !== undefined) data.internalRating = internalRating;
     if (internalTags !== undefined) data.internalTags = internalTags;
     if (internalComment !== undefined) data.internalComment = internalComment;
     if (internalOtherJustification !== undefined) data.internalOtherJustification = internalOtherJustification;
+
     const feedback = await prisma.feedback.update({ where: { id }, data });
-    return NextResponse.json(feedback);
-  } catch {
-    return NextResponse.json({ message: 'Error moderating feedback' }, { status: 500 });
-  }
-}
+    return ok(feedback);
+  });

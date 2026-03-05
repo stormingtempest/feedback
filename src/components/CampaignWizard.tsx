@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { GoogleGenAI } from "@google/genai";
-import axios from 'axios';
+import { api as axios } from '@/lib/axios-client';
 import { fetchDashboardData } from '../services/dashboardService';
 import OpenAI from 'openai';
 

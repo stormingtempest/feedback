@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, created, badRequest, notFound, handle, requireRole } from '@/lib/api';
 
-export async function POST(req: NextRequest) {
-  try {
-    const userId = req.headers.get('x-user-id');
+export const POST = (req: NextRequest) =>
+  handle(async () => {
+    const user = await requireRole(req, 'COMPANY');
     const { name, description } = await req.json();
-    const company = await prisma.company.findFirst({ where: { managerId: userId! } });
-    if (!company) return NextResponse.json({ message: 'Company not found' }, { status: 404 });
-    const project = await prisma.project.create({ data: { name, description, companyId: company.id } });
-    return NextResponse.json(project);
-  } catch {
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  }
-}
+    if (!name) badRequest('Name is required');
+
+    const company = await prisma.company.findFirst({ where: { managerId: user.id } });
+    if (!company) notFound('Company not found');
+
+    const project = await prisma.project.create({ data: { name, description, companyId: company!.id } });
+    return created(project);
+  });

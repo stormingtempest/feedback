@@ -1,21 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, badRequest, unauthorized, handle } from '@/lib/api';
 
-export async function POST(req: NextRequest) {
-  try {
+export const POST = (req: NextRequest) =>
+  handle(async () => {
     const { username, password } = await req.json();
+    if (!username || !password) badRequest('Username and password are required');
+
     const user = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: username }, { name: username }],
-        password: password,
-      },
+      where: { OR: [{ email: username }, { name: username }], password },
     });
-    if (user) {
-      return NextResponse.json({ success: true, role: user.role, userId: user.id, companyTag: user.companyTag });
-    }
-    return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
-  } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
-  }
-}
+    if (!user) unauthorized('Invalid credentials');
+
+    return ok({ success: true, role: user!.role, userId: user!.id, companyTag: user!.companyTag });
+  });

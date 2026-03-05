@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, handle, requireRole } from '@/lib/api';
 
-export async function GET() {
-  try {
+export const GET = (req: NextRequest) =>
+  handle(async () => {
+    await requireRole(req, 'ADMIN', 'MODERATOR');
+
     const feedbacks = await prisma.feedback.findMany({
       include: { user: true, campaign: { include: { company: true } } },
       orderBy: { createdAt: 'desc' },
     });
-    return NextResponse.json(
+
+    return ok(
       feedbacks.map((f) => ({
         id: f.id,
         user: f.user.name,
@@ -26,7 +30,4 @@ export async function GET() {
         internalOtherJustification: f.internalOtherJustification,
       }))
     );
-  } catch {
-    return NextResponse.json({ message: 'Error fetching feedbacks' }, { status: 500 });
-  }
-}
+  });

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { api as axios } from '@/lib/axios-client';
 
 import { ModerationTab } from '../components/ModerationTab';
 

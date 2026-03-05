@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, handle, requireRole } from '@/lib/api';
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  try {
+export const PUT = (req: NextRequest, { params }: { params: Promise<{ id: string }> }) =>
+  handle(async () => {
+    await requireRole(req, 'ADMIN');
+    const { id } = await params;
     const { name, status } = await req.json();
     const project = await prisma.campaign.update({ where: { id }, data: { name, status } });
-    return NextResponse.json(project);
-  } catch {
-    return NextResponse.json({ message: 'Error updating project' }, { status: 500 });
-  }
-}
+    return ok(project);
+  });

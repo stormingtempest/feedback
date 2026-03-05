@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { api as axios } from '@/lib/axios-client';
 import { motion, AnimatePresence } from 'motion/react';
 import { Building2, Megaphone, Plus, BarChart3, LogOut, Download, FileText, BrainCircuit, Settings, ChevronRight, Star, ArrowLeft, FolderKanban, AlertCircle, Info, Clock, Tag, ChevronDown, User, Sparkles, Wand2, LayoutDashboard, PieChart as PieChartIcon, Target, MessageSquare, Shield } from 'lucide-react';
 import { OverviewCard } from '../components/OverviewCard';

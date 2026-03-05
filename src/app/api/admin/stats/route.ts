@@ -1,9 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ok, handle, requireRole } from '@/lib/api';
 
-export async function GET() {
-  try {
-    const [orgCount, projectCount, userCount, managerCount, moderatorCount, pendingFeedbacks, approvedFeedbacks, rejectedFeedbacks, totalFeedbacks] = await Promise.all([
+export const GET = (req: NextRequest) =>
+  handle(async () => {
+    await requireRole(req, 'ADMIN');
+
+    const [
+      orgCount, projectCount, userCount, managerCount, moderatorCount,
+      pendingFeedbacks, approvedFeedbacks, rejectedFeedbacks, totalFeedbacks,
+    ] = await Promise.all([
       prisma.company.count(),
       prisma.campaign.count(),
       prisma.user.count(),
@@ -14,9 +20,13 @@ export async function GET() {
       prisma.feedback.count({ where: { moderationStatus: 'Rejected' } }),
       prisma.feedback.count(),
     ]);
-    return NextResponse.json({ organizations: orgCount, projects: projectCount, users: userCount, managers: managerCount, moderators: moderatorCount, moderation: { pending: pendingFeedbacks, approved: approvedFeedbacks, rejected: rejectedFeedbacks, total: totalFeedbacks } });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: 'Error fetching stats' }, { status: 500 });
-  }
-}
+
+    return ok({
+      organizations: orgCount,
+      projects: projectCount,
+      users: userCount,
+      managers: managerCount,
+      moderators: moderatorCount,
+      moderation: { pending: pendingFeedbacks, approved: approvedFeedbacks, rejected: rejectedFeedbacks, total: totalFeedbacks },
+    });
+  });

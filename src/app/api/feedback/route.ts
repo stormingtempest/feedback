@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { ok, badRequest, handle, getAuthUser } from '@/lib/api';
 
-export async function POST(req: NextRequest) {
-  try {
+export const POST = (req: NextRequest) =>
+  handle(async () => {
+    const authUser = await getAuthUser(req);
     const formData = await req.formData();
-    const userId = formData.get('userId') as string;
+
     const campaignId = formData.get('campaignId') as string;
     const category = formData.get('category') as string;
     const description = formData.get('description') as string;
     const link = formData.get('link') as string | null;
     const ratingsRaw = formData.get('ratings') as string | null;
 
-    if (!userId || !campaignId || !category || !description) {
-      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
-    }
+    if (!campaignId || !category || !description) badRequest('Missing required fields');
 
     const files = formData.getAll('files') as File[];
     const fileUrls: string[] = [];
@@ -36,24 +36,20 @@ export async function POST(req: NextRequest) {
     }
 
     const feedback = await prisma.feedback.create({
-      data: { userId, campaignId, category, description, link, ratings: parsedRatings, files: fileUrls, status: 'Pending', progress: 100 },
+      data: { userId: authUser.id, campaignId, category, description, link, ratings: parsedRatings, files: fileUrls, status: 'Pending', progress: 100 },
     });
 
     const totalPoints = 150 + fileUrls.length * 50;
-    await prisma.user.update({ where: { id: userId }, data: { points: { increment: totalPoints } } });
+    await prisma.user.update({ where: { id: authUser.id }, data: { points: { increment: totalPoints } } });
 
     const mission = await prisma.mission.findFirst({ where: { title: 'Constructive Feedback' } });
     if (mission) {
       await prisma.userMission.upsert({
-        where: { userId_missionId: { userId, missionId: mission.id } },
+        where: { userId_missionId: { userId: authUser.id, missionId: mission.id } },
         update: { completed: true, completedAt: new Date() },
-        create: { userId, missionId: mission.id, completed: true, completedAt: new Date() },
+        create: { userId: authUser.id, missionId: mission.id, completed: true, completedAt: new Date() },
       });
     }
 
-    return NextResponse.json({ success: true, feedback, pointsEarned: totalPoints });
-  } catch (error) {
-    console.error('Feedback Submission Error:', error);
-    return NextResponse.json({ message: 'Failed to submit feedback' }, { status: 500 });
-  }
-}
+    return ok({ success: true, feedback, pointsEarned: totalPoints });
+  });

@@ -6,7 +6,7 @@ import { ShieldCheck, LogOut, MessageSquareWarning, Users, ChevronRight, LayoutD
 import { clsx } from 'clsx';
 import { ModerationTab } from '../components/ModerationTab';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { api as axios } from '@/lib/axios-client';
 
 export const ModeratorPanel = () => {
   const router = useRouter();

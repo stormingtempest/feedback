@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { api as axios } from '@/lib/axios-client';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, XCircle, Clock, MessageSquareWarning, Search, Filter, Lock, Star, Tag, Image as ImageIcon, Video, ChevronDown, Check, ShieldAlert } from 'lucide-react';
 import { clsx } from 'clsx';

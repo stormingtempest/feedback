@@ -1,2 +1,3 @@
-import { NextResponse } from 'next/server';
-export async function GET() { return NextResponse.json({ status: 'ok' }); }
+import { ok, handle } from '@/lib/api';
+
+export const GET = () => handle(async () => ok({ status: 'ok' }));
