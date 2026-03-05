@@ -36,8 +36,8 @@ router.post('/', upload.array('files'), async (req, res) => {
         category,
         description,
         link,
-        ratings: parsedRatings,
-        files: fileUrls,
+        ratings: typeof parsedRatings === 'string' ? parsedRatings : JSON.stringify(parsedRatings),
+        files: JSON.stringify(fileUrls),
         status: 'Pending',
         progress: 100
       }

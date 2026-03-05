@@ -25,6 +25,19 @@ export const login = async (username: string, password: string) => {
       return { success: false, data: null, error: 'Invalid credentials' };
     }
   } else {
-    return await apiRequest('login', { username, password });
+    try {
+      const response = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        return { success: true, data, error: null };
+      }
+      return { success: false, data: null, error: data.message || 'Invalid credentials' };
+    } catch {
+      return { success: false, data: null, error: 'Network error' };
+    }
   }
 };

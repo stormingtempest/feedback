@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String?   @unique
+  name            String
+  password        String?
+  role            String    @default("USER")
+  status          String    @default("Active")
+  avatarSeed      String?
+  googleId        String?   @unique
+  discordId       String?   @unique
+  level           Int       @default(1)
+  levelTitle      String?
+  points          Int       @default(0)
+  nextLevelPoints Int       @default(1000)
+  description     String?
+  lastNameChange  DateTime?
+  companyTag      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  achievements    UserAchievement[]
+  missions        UserMission[]
+  feedbacks       Feedback[]
+  upgradeRequests UpgradeRequest[]
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  icon        String
+  label       String            @unique
+  color       String
+  description String
+  points      Int               @default(0)
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+model Mission {
+  id          String        @id @default(cuid())
+  title       String        @unique
+  description String
+  points      Int           @default(0)
+  users       UserMission[]
+}
+
+model UserMission {
+  id          String    @id @default(cuid())
+  userId      String
+  missionId   String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id])
+  mission     Mission   @relation(fields: [missionId], references: [id])
+
+  @@unique([userId, missionId])
+}
+
+model Company {
+  id          String     @id @default(cuid())
+  name        String
+  tag         String?    @unique
+  status      String     @default("Active")
+  autoApprove Boolean    @default(false)
+  managerId   String?
+  aiContext   String?
+  aiGoals     String?
+  aiProvider  String?    @default("gemini")
+  apiKey      String?
+  apiModel    String?
+  logoUrl     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  projects    Project[]
+  campaigns   Campaign[]
+  insights    Insight[]
+}
+
+model Project {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  companyId   String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  company     Company    @relation(fields: [companyId], references: [id])
+  campaigns   Campaign[]
+}
+
+model Campaign {
+  id            String     @id @default(cuid())
+  name          String
+  description   String?
+  status        String     @default("Active")
+  progress      Int        @default(0)
+  companyId     String
+  projectId     String?
+  questions     String     @default("[]")
+  badgeConfig   String     @default("{}")
+  missions      String     @default("[]")
+  feedbackBonus Int        @default(50)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  company       Company    @relation(fields: [companyId], references: [id])
+  project       Project?   @relation(fields: [projectId], references: [id])
+  feedbacks     Feedback[]
+}
+
+model Feedback {
+  id                        String    @id @default(cuid())
+  category                  String
+  description               String
+  status                    String    @default("Pending")
+  moderationStatus          String    @default("Pending")
+  progress                  Int       @default(0)
+  link                      String?
+  ratings                   String?
+  files                     String?
+  internalRating            Int?
+  internalTags              String?
+  internalComment           String?
+  internalOtherJustification String?
+  companyResponse           String?
+  userId                    String
+  campaignId                String
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  user                      User      @relation(fields: [userId], references: [id])
+  campaign                  Campaign  @relation(fields: [campaignId], references: [id])
+}
+
+model UpgradeRequest {
+  id           String   @id @default(cuid())
+  userId       String
+  companyName  String
+  businessType String
+  reason       String
+  telegram     String?
+  whatsapp     String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Insight {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  priority    String   @default("Medium")
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company     Company  @relation(fields: [companyId], references: [id])
+}
