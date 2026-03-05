@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -115,9 +115,9 @@ model Campaign {
   progress      Int        @default(0)
   companyId     String
   projectId     String?
-  questions     String     @default("[]")
-  badgeConfig   String     @default("{}")
-  missions      String     @default("[]")
+  questions     Json       @default("[]")
+  badgeConfig   Json       @default("{}")
+  missions      Json       @default("[]")
   feedbackBonus Int        @default(50)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -135,10 +135,10 @@ model Feedback {
   moderationStatus          String    @default("Pending")
   progress                  Int       @default(0)
   link                      String?
-  ratings                   String?
-  files                     String?
+  ratings                   Json?
+  files                     Json?
   internalRating            Int?
-  internalTags              String?
+  internalTags              Json?
   internalComment           String?
   internalOtherJustification String?
   companyResponse           String?
