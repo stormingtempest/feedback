@@ -15,8 +15,6 @@ import { clsx } from 'clsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { IS_MOCK } from '../config/env';
-import { mockCompanyData } from '../services/mockData';
 
 export const CompanyPanel = () => {
   const router = useRouter();
@@ -30,16 +28,12 @@ export const CompanyPanel = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['companyDashboard'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockCompanyData;
-      }
-      const res = await axios.get('api/company/dashboard', {
+      const res = await axios.get('/api/company/dashboard', {
         headers: { 'x-user-id': userId }
       });
       return res.data;
     },
-    enabled: !!userId || IS_MOCK
+    enabled: !!userId
   });
 
   const [explanationModal, setExplanationModal] = useState<{ title: string, content: string } | null>(null);
@@ -54,15 +48,7 @@ export const CompanyPanel = () => {
   const { data: insightsData, isLoading: isLoadingInsights, refetch: fetchInsights } = useQuery({
     queryKey: ['companyInsights'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        return {
-          insights: [
-            { id: '1', date: '2026-03-05', type: 'Overview', keyword: 'Engagement Spike', summary: 'Overall platform engagement increased by 15% this week.', details: 'The recent campaign launch drove significant activity in the feedback module.', recommendations: ['Maintain current campaign pace', 'Analyze specific feedback topics'], priority: 'High', title: 'Engagement Spike', description: 'Overall platform engagement increased by 15% this week.' },
-            { id: '2', date: '2026-03-04', type: 'Projects', keyword: 'Checkout Flow', summary: 'Users are struggling with the new checkout flow.', details: 'Feedback indicates confusion during the payment step.', recommendations: ['Simplify payment form', 'Add tooltips for clarity'], priority: 'Medium', title: 'Checkout Flow', description: 'Users are struggling with the new checkout flow.' }
-          ]
-        };
-      }
-      const res = await axios.post('api/company/insights', { forceRegenerate: false }, {
+      const res = await axios.post('/api/company/insights', { forceRegenerate: false }, {
         headers: { 'x-user-id': userId }
       });
       return res.data;
@@ -84,11 +70,7 @@ export const CompanyPanel = () => {
 
   const createCampaignMutation = useMutation({
     mutationFn: async (campaignData: any) => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { data: { success: true } };
-      }
-      return axios.post('api/api.php', { ...campaignData, action: 'createCampaign' }, {
+      return axios.post('/api/company/campaigns', campaignData, {
         headers: { 'x-user-id': userId }
       });
     },
@@ -163,17 +145,6 @@ export const CompanyPanel = () => {
 
         const responseText = await generateText(prompt, modelName);
         return JSON.parse(responseText || '{"insights": []}');
-      }
-
-      // Fallback to API or mock
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return {
-          insights: [
-            { id: `mock-${Date.now()}-1`, date: new Date().toISOString().split('T')[0], type: 'Projects', title: 'Improve Mobile UX', description: 'Users report crashes on login.', recommendations: ['Fix login API', 'Add error logging'], importantForCompany: 'Critical for user retention' },
-            { id: `mock-${Date.now()}-2`, date: new Date().toISOString().split('T')[0], type: 'Overview', title: 'Feature Request: Dark Mode', description: 'Many users are asking for a dark theme.', recommendations: ['Implement theme switcher'], importantForCompany: 'Enhances accessibility and user experience' }
-          ]
-        };
       }
 
       const res = await axios.post('/api/company/insights', { forceRegenerate: true, areas, subFilters }, {

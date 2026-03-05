@@ -6,8 +6,6 @@ import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { IS_MOCK } from '../config/env';
-import { mockAdminData, mockOrganizations } from '../services/mockData';
 
 import { ModerationTab } from '../components/ModerationTab';
 
@@ -59,11 +57,7 @@ export const AdminPanel = () => {
   const { data: stats } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockAdminData;
-      }
-      const res = await axios.get('api/admin/stats');
+      const res = await axios.get('/api/admin/stats');
       return res.data;
     }
   });
@@ -71,14 +65,10 @@ export const AdminPanel = () => {
   const { data: organizations = [] } = useQuery({
     queryKey: ['adminOrganizations'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockOrganizations;
-      }
-      const res = await axios.get('api/admin/organizations');
+      const res = await axios.get('/api/admin/organizations');
       return res.data;
     },
-    enabled: activeTab === 'organizations' || activeTab === 'moderation' || IS_MOCK
+    enabled: activeTab === 'organizations' || activeTab === 'moderation'
   });
 
   const { data: projects = [] } = useQuery({

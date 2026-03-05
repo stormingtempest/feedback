@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Bug, ThumbsUp, Lightbulb, HelpCircle, Mic, Square, Upload, Star, CheckCircle2, ChevronRight, ChevronLeft, Image as ImageIcon, Link as LinkIcon, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import axios from 'axios';
-import { mockCompanyData } from '../services/mockData';
 
 import { playSound } from '../utils/sound';
 
@@ -50,13 +49,8 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
     link: ''
   });
 
-  // Find campaign questions if available
-  const campaign = mockCompanyData.company.projects
-    .find(p => p.id === projectId || p.name === projectName)
-    ?.campaigns.find(c => c.status === 'Active');
-  
-  const questions = campaign?.questions || [];
-  const hasCustomQuestions = questions.length > 0;
+  const questions: { id: string; text: string; style: 'rating' | 'text' }[] = [];
+  const hasCustomQuestions = false;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -546,18 +540,9 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
                     </motion.div>
                     <h2 className="text-3xl font-black text-slate-800 mb-2">Feedback Sent!</h2>
                     <p className="text-slate-500 text-center max-w-xs mb-8">
-                      You earned <span className="font-bold text-blue-600">+{campaign?.responseBonus || 150} points</span>. 
+                      You earned <span className="font-bold text-blue-600">+{150} points</span>. 
                       Your feedback will be reviewed and you can earn extra bonuses!
                     </p>
-                    {campaign?.badge && (
-                      <div className="flex items-center gap-3 bg-yellow-50 p-4 rounded-xl border border-yellow-100 mb-6">
-                        <div className="text-3xl">{campaign.badge.icon}</div>
-                        <div className="text-left">
-                          <p className="font-bold text-yellow-800 text-sm">Badge Unlocked!</p>
-                          <p className="font-black text-yellow-900">{campaign.badge.name}</p>
-                        </div>
-                      </div>
-                    )}
                     <div className="w-full max-w-xs bg-slate-100 rounded-full h-2 overflow-hidden">
                       <motion.div 
                         className="h-full bg-green-500"

@@ -7,8 +7,6 @@ import { clsx } from 'clsx';
 import { ModerationTab } from '../components/ModerationTab';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { IS_MOCK } from '../config/env';
-import { mockAdminData, mockOrganizations } from '../services/mockData';
 
 export const ModeratorPanel = () => {
   const router = useRouter();
@@ -20,10 +18,6 @@ export const ModeratorPanel = () => {
   const { data: stats } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockAdminData;
-      }
       const res = await axios.get('/api/admin/stats');
       return res.data;
     }
@@ -32,10 +26,6 @@ export const ModeratorPanel = () => {
   const { data: organizations = [] } = useQuery({
     queryKey: ['adminOrganizations'],
     queryFn: async () => {
-      if (IS_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockOrganizations;
-      }
       const res = await axios.get('/api/admin/organizations');
       return res.data;
     }
