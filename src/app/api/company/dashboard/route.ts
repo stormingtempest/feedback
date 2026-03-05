@@ -2,21 +2,21 @@ import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ok, notFound, handle, requireRole } from '@/lib/api';
 
+const feedbackSelect = {
+  where: { moderationStatus: 'Approved' },
+  orderBy: { createdAt: 'desc' as const },
+  include: { user: { select: { name: true } } },
+};
+
 const companyInclude = {
   projects: {
     include: {
-      campaigns: {
-        include: {
-          feedbacks: { where: { moderationStatus: 'Approved' }, orderBy: { createdAt: 'desc' as const } },
-        },
-      },
+      campaigns: { include: { feedbacks: feedbackSelect } },
     },
   },
   campaigns: {
     where: { projectId: null as string | null },
-    include: {
-      feedbacks: { where: { moderationStatus: 'Approved' }, orderBy: { createdAt: 'desc' as const } },
-    },
+    include: { feedbacks: feedbackSelect },
   },
 };
 

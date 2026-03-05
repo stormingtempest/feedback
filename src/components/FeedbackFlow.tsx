@@ -35,6 +35,7 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pointsEarned, setPointsEarned] = useState(150);
   const [audioText, setAudioText] = useState('');
   const [permissionStatus, setPermissionStatus] = useState<PermissionState | 'prompt' | 'denied' | 'granted'>('prompt');
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
@@ -247,7 +248,6 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
       }
 
       const formData = new FormData();
-      formData.append('userId', userId);
       formData.append('campaignId', projectId);
       formData.append('category', feedbackData.category);
       formData.append('description', feedbackData.description);
@@ -259,9 +259,10 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
         formData.append('files', file);
       });
 
-      await axios.post('/api/feedback', formData, {
+      const res = await axios.post('/api/feedback', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      setPointsEarned(res.data?.pointsEarned ?? 150);
 
       playSound('taskComplete');
       nextStage(); // Go to success screen
@@ -540,7 +541,7 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
                     </motion.div>
                     <h2 className="text-3xl font-black text-slate-800 mb-2">Feedback Sent!</h2>
                     <p className="text-slate-500 text-center max-w-xs mb-8">
-                      You earned <span className="font-bold text-blue-600">+{150} points</span>. 
+                      You earned <span className="font-bold text-blue-600">+{pointsEarned} points</span>. 
                       Your feedback will be reviewed and you can earn extra bonuses!
                     </p>
                     <div className="w-full max-w-xs bg-slate-100 rounded-full h-2 overflow-hidden">
@@ -851,7 +852,7 @@ export const FeedbackFlow = ({ isOpen, onClose, projectName, projectId, initialS
                 </motion.div>
                 <h2 className="text-3xl font-black text-slate-800 mb-2">Feedback Sent!</h2>
                 <p className="text-slate-500 text-center max-w-xs mb-8">
-                  You earned <span className="font-bold text-blue-600">+150 points</span>. 
+                  You earned <span className="font-bold text-blue-600">+{pointsEarned} points</span>. 
                   Your feedback will be reviewed and you can earn extra bonuses!
                 </p>
                 <div className="w-full max-w-xs bg-slate-100 rounded-full h-2 overflow-hidden">

@@ -32,12 +32,7 @@ export const Dashboard = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboardData'],
-    queryFn: async () => {
-      const baseData = await fetchDashboardData();
-      // In a real app, this would come from the API
-      // For now, we rely on fetchDashboardData returning the updated mock data
-      return baseData;
-    },
+    queryFn: fetchDashboardData,
   });
 
   const updateUserMutation = useMutation({

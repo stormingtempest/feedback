@@ -1020,32 +1020,21 @@ export const CompanyPanel = () => {
           )}
           {activeTab === 'moderated' && (
             <motion.div key="moderated" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <ModeratedFeedbacksTab 
+              <ModeratedFeedbacksTab
                 feedbacks={data.company.projects.flatMap((p: any) => p.campaigns.flatMap((c: any) => c.feedbacks.map((f: any) => ({
                     ...f,
-                    status: f.status || 'approved',
-                    moderatorComment: f.moderatorComment || 'Great feedback, very detailed.',
+                    status: f.moderationStatus?.toLowerCase() || 'approved',
+                    moderatorComment: f.internalComment || '',
                     projectName: p.name,
                     campaignName: c.name,
-                    userName: f.userId === 'u1' ? 'Alice Johnson' : 'Bob Smith', // Mock names
-                    userAvatar: f.userId === 'u1' ? 'https://i.pravatar.cc/150?u=a' : 'https://i.pravatar.cc/150?u=b',
-                    title: f.description.substring(0, 30) + (f.description.length > 30 ? '...' : ''), // Derive title from description
-                    internalRating: f.internalRating || 4,
-                    internalTags: f.internalTags || ['Usability']
+                    userName: f.user?.name || 'Unknown User',
+                    title: f.description.substring(0, 30) + (f.description.length > 30 ? '...' : ''),
+                    internalRating: f.internalRating || 0,
+                    internalTags: f.internalTags || [],
                 }))))}
-                onRespond={(id, response, bonusPoints) => {
-                  // In a real app, this would be a mutation
-                  console.log('Responding to', id, response, 'Bonus:', bonusPoints);
-                  alert(`Response sent! +${bonusPoints} XP awarded to user.`);
-                  // Optimistic update for mock
-                  const feedback = data.company.projects
-                    .flatMap((p: any) => p.campaigns)
-                    .flatMap((c: any) => c.feedbacks)
-                    .find((f: any) => f.id === id);
-                  if (feedback) {
-                    feedback.companyResponse = response;
-                    queryClient.invalidateQueries({ queryKey: ['companyDashboard'] });
-                  }
+                onRespond={async (id, response, bonusPoints) => {
+                  await axios.patch(`/api/feedback/${id}`, { companyResponse: response, bonusPoints });
+                  queryClient.invalidateQueries({ queryKey: ['companyDashboard'] });
                 }}
               />
             </motion.div>

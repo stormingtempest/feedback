@@ -316,11 +316,6 @@ export const CampaignWizard = ({ projectId, onClose, onSave }: CampaignWizardPro
       feedbacks: []
     };
 
-    // Save to localStorage for testing
-    const storedCampaigns = JSON.parse(localStorage.getItem('mock_campaigns') || '[]');
-    storedCampaigns.push(campaignData);
-    localStorage.setItem('mock_campaigns', JSON.stringify(storedCampaigns));
-
     onSave(campaignData);
   };
 

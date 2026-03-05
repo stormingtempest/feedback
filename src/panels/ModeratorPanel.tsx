@@ -226,7 +226,7 @@ export const ModeratorPanel = () => {
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Avg. Response</span>
-                  <span className="text-sm font-black text-slate-700">4.2h (Last 24h)</span>
+                  <span className="text-sm font-black text-slate-700">—</span>
                 </div>
               </div>
             </div>
