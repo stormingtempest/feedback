@@ -26,6 +26,7 @@ export const POST = (req: NextRequest) =>
 
     if (allFeedbacks.length === 0) return ok({ insights: [] });
 
+    // eslint-disable-next-line no-useless-assignment
     let generatedInsights: { title: string; description: string; priority: string }[] = [];
     const apiKey = company!.apiKey || process.env.GEMINI_API_KEY;
 
