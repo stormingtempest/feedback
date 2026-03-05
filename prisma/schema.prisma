@@ -31,6 +31,9 @@ model User {
   missions        UserMission[]
   feedbacks       Feedback[]
   upgradeRequests UpgradeRequest[]
+
+  @@index([role])
+  @@index([companyTag])
 }
 
 model Achievement {
@@ -48,8 +51,8 @@ model UserAchievement {
   userId        String
   achievementId String
   unlockedAt    DateTime    @default(now())
-  user          User        @relation(fields: [userId], references: [id])
-  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
 }
@@ -68,8 +71,8 @@ model UserMission {
   missionId   String
   completed   Boolean   @default(false)
   completedAt DateTime?
-  user        User      @relation(fields: [userId], references: [id])
-  mission     Mission   @relation(fields: [missionId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission     Mission   @relation(fields: [missionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, missionId])
 }
@@ -93,6 +96,8 @@ model Company {
   projects    Project[]
   campaigns   Campaign[]
   insights    Insight[]
+
+  @@index([managerId])
 }
 
 model Project {
@@ -103,8 +108,10 @@ model Project {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  company     Company    @relation(fields: [companyId], references: [id])
-  campaigns   Campaign[]
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+
+  @@index([companyId])
 }
 
 model Campaign {
@@ -122,33 +129,39 @@ model Campaign {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  company       Company    @relation(fields: [companyId], references: [id])
-  project       Project?   @relation(fields: [projectId], references: [id])
-  feedbacks     Feedback[]
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project   Project?   @relation(fields: [projectId], references: [id])
+  feedbacks Feedback[]
+
+  @@index([companyId])
+  @@index([projectId])
 }
 
 model Feedback {
-  id                        String    @id @default(cuid())
-  category                  String
-  description               String
-  status                    String    @default("Pending")
-  moderationStatus          String    @default("Pending")
-  progress                  Int       @default(0)
-  link                      String?
-  ratings                   Json?
-  files                     Json?
-  internalRating            Int?
-  internalTags              Json?
-  internalComment           String?
+  id                         String   @id @default(cuid())
+  category                   String
+  description                String
+  moderationStatus           String   @default("Pending")
+  link                       String?
+  ratings                    Json?
+  files                      Json?
+  internalRating             Int?
+  internalTags               Json?
+  internalComment            String?
   internalOtherJustification String?
-  companyResponse           String?
-  userId                    String
-  campaignId                String
-  createdAt                 DateTime  @default(now())
-  updatedAt                 DateTime  @updatedAt
+  companyResponse            String?
+  moderatedBy                String?
+  userId                     String
+  campaignId                 String
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 
-  user                      User      @relation(fields: [userId], references: [id])
-  campaign                  Campaign  @relation(fields: [campaignId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([moderationStatus])
+  @@index([userId])
+  @@index([campaignId])
 }
 
 model UpgradeRequest {
@@ -157,11 +170,15 @@ model UpgradeRequest {
   companyName  String
   businessType String
   reason       String
+  status       String   @default("Pending")
   telegram     String?
   whatsapp     String?
   createdAt    DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Insight {
@@ -172,5 +189,7 @@ model Insight {
   companyId   String
   createdAt   DateTime @default(now())
 
-  company     Company  @relation(fields: [companyId], references: [id])
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }

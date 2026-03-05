@@ -36,7 +36,7 @@ export const POST = (req: NextRequest) =>
     }
 
     const feedback = await prisma.feedback.create({
-      data: { userId: authUser.id, campaignId, category, description, link, ratings: parsedRatings, files: fileUrls, status: 'Pending', progress: 100 },
+      data: { userId: authUser.id, campaignId, category, description, link, ratings: parsedRatings, files: fileUrls },
     });
 
     const totalPoints = 150 + fileUrls.length * 50;

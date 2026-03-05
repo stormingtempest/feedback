@@ -69,7 +69,7 @@ export const GET = (req: NextRequest) =>
     const statusMetrics = {
       unanswered: allFeedbacks.filter((f) => !f.companyResponse).length,
       averageResponseTime: 0,
-      directives: allFeedbacks.reduce((acc, f) => { acc[f.status] = (acc[f.status] || 0) + 1; return acc; }, {} as Record<string, number>),
+      directives: allFeedbacks.reduce((acc, f) => { acc[f.moderationStatus] = (acc[f.moderationStatus] || 0) + 1; return acc; }, {} as Record<string, number>),
     };
 
     return ok({
