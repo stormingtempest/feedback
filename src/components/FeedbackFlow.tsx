@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Bug, ThumbsUp, Lightbulb, HelpCircle, Mic, Square, Upload, Star, CheckCircle2, ChevronRight, ChevronLeft, Image as ImageIcon, Link as LinkIcon, Info } from 'lucide-react';

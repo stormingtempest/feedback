@@ -1,5 +1,6 @@
+'use client';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { User, ShieldCheck, ShieldAlert, Building2 } from 'lucide-react';
 
 const CREDENTIALS: Record<string, { username: string; password: string }> = {
@@ -10,7 +11,7 @@ const CREDENTIALS: Record<string, { username: string; password: string }> = {
 };
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +29,7 @@ export const LoginPage: React.FC = () => {
       if (data.success) {
         localStorage.setItem('userId', data.userId);
         localStorage.setItem('userRole', data.role);
-        navigate(path);
+        router.push(path);
       } else {
         setError(data.message || 'Login failed');
       }

@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, Star, Zap, Shield, Trophy, Target } from 'lucide-react';

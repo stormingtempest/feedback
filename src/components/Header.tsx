@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { LogOut, Search, Trophy, Settings, Star, Shield, Target, Sparkles } from 'lucide-react';
 import { UserStats } from '../types';

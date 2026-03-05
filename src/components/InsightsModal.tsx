@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { motion } from 'motion/react';
 import { X, Sparkles, Filter, Calendar } from 'lucide-react';

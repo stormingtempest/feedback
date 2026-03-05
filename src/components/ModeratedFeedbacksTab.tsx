@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, XCircle, MessageSquare, Filter, Star, Send, AlertCircle, User, Trophy, ChevronDown, Search } from 'lucide-react';
