@@ -3,7 +3,17 @@ export interface Project {
   name: string;
   companyName: string;
   description: string;
-  progress: number;
+}
+
+export interface UserFeedbackCard {
+  id: string;
+  category: 'bug' | 'praise' | 'suggestion' | 'question';
+  description: string;
+  moderationStatus: string;
+  files: string[];
+  link?: string | null;
+  companyResponse?: string | null;
+  createdAt: string;
 }
 
 export interface FeedbackHistory {

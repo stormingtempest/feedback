@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
@@ -11,6 +11,33 @@ const POINTS_BASE = 150;
 const POINTS_PER_FILE = 50;
 
 const VALID_CATEGORIES = ['bug', 'praise', 'suggestion', 'question'];
+
+export const GET = (req: NextRequest) =>
+  handle(async () => {
+    const authUser = await getAuthUser(req);
+    const campaignId = req.nextUrl.searchParams.get('campaignId');
+    if (!campaignId) badRequest('campaignId required');
+    const feedbacks = await prisma.feedback.findMany({
+      where: { userId: authUser.id, campaignId: campaignId! },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        category: true,
+        description: true,
+        moderationStatus: true,
+        files: true,
+        link: true,
+        companyResponse: true,
+        createdAt: true,
+      },
+    });
+    const result = feedbacks.map((f) => ({
+      ...f,
+      files: Array.isArray(f.files) ? (f.files as string[]) : [],
+      createdAt: f.createdAt.toISOString(),
+    }));
+    return NextResponse.json(result);
+  });
 
 export const POST = (req: NextRequest) =>
   handle(async () => {

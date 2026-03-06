@@ -17,7 +17,7 @@ export const GET = (req: NextRequest, { params }: { params: Promise<{ userId: st
     });
     if (!user) notFound('User not found');
 
-    const campaigns = await prisma.campaign.findMany({ take: 4, orderBy: { createdAt: 'desc' } });
+    const campaigns = await prisma.campaign.findMany({ take: 4, orderBy: { createdAt: 'desc' }, include: { company: true } });
 
     return ok({
       user: {
@@ -53,7 +53,7 @@ export const GET = (req: NextRequest, { params }: { params: Promise<{ userId: st
         id: c.id,
         name: c.name,
         description: c.description || '',
-        progress: c.progress,
+        companyName: c.company.name,
       })),
       history: user!.feedbacks.map((f) => ({
         id: f.id,

@@ -8,19 +8,21 @@ import { fetchDashboardData } from '../services/dashboardService';
 import { Header } from '../components/Header';
 import { FeedbackCard } from '../components/FeedbackCard';
 import { FeedbackFlow } from '../components/FeedbackFlow';
+import { ProjectDetailModal } from '../components/ProjectDetailModal';
 import { BadgesModal } from '../components/BadgesModal';
 import { SettingsDrawer } from '../components/SettingsDrawer';
 import { clsx } from 'clsx';
-import { UserStats } from '../types';
+import { UserStats, Project } from '../types';
 import { playSound } from '../utils/sound';
 
 export const Dashboard = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [projectDetailOpen, setProjectDetailOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedProjectId, setSelectedProjectId] = useState('');
-  const [initialFeedbackStage, setInitialFeedbackStage] = useState(0);
+  const [selectedProjectData, setSelectedProjectData] = useState<Project | null>(null);
   const [badgesOpen, setBadgesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -74,18 +76,11 @@ export const Dashboard = () => {
 
   const userRole = localStorage.getItem('userRole');
 
-  const handleStartFeedback = (project: any) => {
+  const handleOpenProject = (project: Project) => {
     setSelectedProject(project.name);
     setSelectedProjectId(project.id);
-    
-    let stage = 0;
-    if (project.progress >= 75) stage = 3;
-    else if (project.progress >= 50) stage = 2;
-    
-    if (project.progress === 100) stage = 4;
-
-    setInitialFeedbackStage(stage);
-    setFeedbackOpen(true);
+    setSelectedProjectData(project);
+    setProjectDetailOpen(true);
     playSound('click');
   };
 
@@ -295,7 +290,7 @@ export const Dashboard = () => {
           {filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
               {filteredProjects.map((project, idx) => (
-                <div key={project.id} onClick={() => handleStartFeedback(project)} className="cursor-pointer">
+                <div key={project.id} onClick={() => handleOpenProject(project)} className="cursor-pointer">
                   <FeedbackCard project={project} idx={idx} />
                 </div>
               ))}
@@ -518,12 +513,18 @@ export const Dashboard = () => {
         )}
 
         {/* Modals */}
-        <FeedbackFlow 
-          isOpen={feedbackOpen} 
-          onClose={() => setFeedbackOpen(false)} 
-          projectName={selectedProject} 
+        <ProjectDetailModal
+          isOpen={projectDetailOpen}
+          onClose={() => setProjectDetailOpen(false)}
+          project={selectedProjectData}
+          onGiveFeedback={() => setFeedbackOpen(true)}
+        />
+        <FeedbackFlow
+          isOpen={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+          projectName={selectedProject}
           projectId={selectedProjectId}
-          initialStage={initialFeedbackStage}
+          initialStage={0}
         />
         
         <BadgesModal 
